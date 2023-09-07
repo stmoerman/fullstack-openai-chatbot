@@ -1,8 +1,9 @@
 "use client";
 
 import { FC, HTMLAttributes, useContext, useRef, useState } from "react";
-import { nanoid } from "nanoid";
 
+import { nanoid } from "nanoid";
+import { toast } from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
 import { useMutation } from "@tanstack/react-query";
 
@@ -34,6 +35,10 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
         },
         body: JSON.stringify({ messages: [message] }),
       });
+
+      if (!response.ok) {
+        throw new Error();
+      }
 
       return response.body;
     },
@@ -71,6 +76,13 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
       setIsMessageUpdating(false);
       setInput("");
 
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 10);
+    },
+    onError(_, message) {
+      toast.error("Something went wrong. Try sending me a message again.");
+      removeMessage(message.id);
       setTimeout(() => {
         textareaRef.current?.focus();
       }, 10);
