@@ -21,13 +21,27 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messages: "Hello world" }),
+        body: JSON.stringify({ messages: [message] }),
       });
 
       return response.body;
     },
-    onSuccess: () => {
-      console.log("success");
+    onSuccess: async (stream) => {
+      if (!stream)
+        throw new Error(
+          "Oops, something went wrong. Try sending me a message again."
+        );
+
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        console.log(chunkValue);
+      }
     },
   });
 
